@@ -32,3 +32,10 @@ jobs:
       
     - name: Build with Gradle Wrapper
       run: ./gradlew clean test -Dcucumber.filter.tags="@CalendarFeature"
+
+    - name: Test Report Generation
+      uses: actions/upload-artifact@v4
+      if: success() || failure()
+      with:
+          name: Serenity Report                 # Name of the folder
+          path: target/site/serenity/           # Path to test results
