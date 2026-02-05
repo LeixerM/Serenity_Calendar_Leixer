@@ -1,9 +1,5 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+# This workflow builds and tests a Java project with Gradle
+# and allows manual execution from GitHub Actions
 
 name: Ejecucion Test del Proyecto
 
@@ -13,29 +9,42 @@ on:
   pull_request:
     branches: [ "main" ]
 
+  # 👉 Habilita ejecución manual
+  workflow_dispatch:
+    inputs:
+      cucumber_tag:
+        description: 'Tag de Cucumber a ejecutar'
+        required: true
+        default: '@CalendarFeature'
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-      
-    - name: Build with Gradle Wrapper
-      run: ./gradlew clean test -Dcucumber.filter.tags="@CalendarFeature"
+      # Checkout del código
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Test Report Generation
-      uses: actions/upload-artifact@v4
-      if: success() || failure()
-      with:
-          name: Serenity Report                 # Name of the folder
-          path: target/site/serenity/           # Path to test results
+      # Setup Java 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Permisos para gradlew
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      # Ejecutar tests con Gradle + Cucumber
+      - name: Build and run tests
+        run: ./gradlew clean test -Dcucumber.filter.tags="${{ inputs.cucumber_tag }}"
+
+      # Generar / subir reporte aunque falle
+      - name: Test Report Generation
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Serenity Report
+          path: target/site/serenity/
