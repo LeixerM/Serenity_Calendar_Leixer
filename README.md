@@ -1,4 +1,4 @@
-# Proyecto base de Serenity BDD
+# Proyecto de Serenity BDD para un Calendario en JQUERY
 
 1. Realizado en Java 16
 2. Dependencia Gradle 8
