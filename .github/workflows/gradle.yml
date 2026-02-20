@@ -21,6 +21,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -37,37 +41,23 @@ jobs:
       - name: Build and run tests
         run: ./gradlew clean test -Dcucumber.filter.tags="${{ inputs.cucumber_tag }}"
 
-      # Generar reporte Serenity
       - name: Generate Serenity Report
         if: success() || failure()
         run: ./gradlew aggregate
 
-      # Detectar dónde se generó el reporte
       - name: Prepare report folder
         if: success() || failure()
         run: |
+          mkdir -p public
           if [ -d "build/reports/serenity" ]; then
-            echo "Report found in build/"
-            mkdir -p public
             cp -r build/reports/serenity/* public/
           elif [ -d "target/site/serenity" ]; then
-            echo "Report found in target/"
-            mkdir -p public
             cp -r target/site/serenity/* public/
           else
             echo "Serenity report folder not found!"
             exit 1
           fi
 
-      # Subir artefacto interno
-      - name: Upload Serenity Artifact
-        if: success() || failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Serenity Report
-          path: public/
-
-      # Configurar GitHub Pages
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
@@ -77,4 +67,5 @@ jobs:
           path: public/
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
