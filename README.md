@@ -62,10 +62,9 @@ Requirements: JDK 21 and Google Chrome (the driver is resolved automatically by 
 ```bash
 ./gradlew clean test aggregate                          # full suite + HTML report
 ./gradlew clean test aggregate -Dcucumber.filter.tags="@TypeDate"   # one scenario by tag
-./gradlew clean test aggregate -Dheadless.mode=false    # watch the browser
 ```
 
-Open `target/site/serenity/index.html` to see the report.
+Open `target/site/serenity/index.html` to see the report. Chrome runs headless (see `serenity.conf`); remove `headless=new` there to watch the browser.
 
 ## Continuous integration
 
